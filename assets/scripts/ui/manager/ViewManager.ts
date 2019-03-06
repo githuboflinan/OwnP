@@ -38,6 +38,7 @@ export default class ViewManager {
                 this.retainDeps(deps);
 
                 if (node.logicComponent && node.logicComponent.onEnter) {
+                    node.logicComponent.data = data;
                     node.logicComponent.deps = deps;
                     node.logicComponent.onEnter();
                 }
@@ -77,7 +78,7 @@ export default class ViewManager {
             if (this.depsCaches[deps] && this.depsCaches[deps] > 0) {
                 this.depsCaches[deps] -= 1;
             }
-        } else if (deps && deps instanceof Array) {
+        } else if (deps && deps instanceof Array && deps.length > 0) {
             deps.forEach(dep => {
                 this.releaseDeps(dep);
             });
