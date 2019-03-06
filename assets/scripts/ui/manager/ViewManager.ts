@@ -3,15 +3,15 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class ViewManager {
-    static instance = null;
-
     static getInstance() {
-        if (!this.instance) {
-            this.instance = new ViewManager();
+        if (!ViewManager.instance) {
+            ViewManager.instance = new ViewManager();
         }
 
-        return this.instance;
+        return ViewManager.instance;
     }
+
+    private static instance = null;
 
     isShowing: boolean = false;
 
