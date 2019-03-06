@@ -23,7 +23,19 @@ export default class GameStart extends cc.Component {
 
         cc.log("hello new game");
 
-        this.testView();
+        let arrNode = this.node.getChildByName("arrow_exp");
+        arrNode.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
+        arrNode.on(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
+
+        // this.testView();
+    }
+
+    onTouchStart(event: cc.Event.EventTouch) {
+        // let pos = this.node.convertTouchToNodeSpaceAR(event.touch);
+    }
+
+    onTouchEnd(event: cc.Event.EventTouch) {
+        ViewManager.getInstance().openView("MainView");
     }
 
     testView() {
