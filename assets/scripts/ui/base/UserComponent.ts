@@ -41,16 +41,39 @@ export default class UserComponent extends cc.Component {
         // todo
     }
 
+    setSpriteFrameByName(imgName: string, node: cc.Node) {
+        let callBack = deps => {
+            if (deps && typeof deps === "string") {
+                if (this.deps.indexOf(deps) === -1) {
+                    this.deps.push(deps);
+                    ViewManager.getInstance().retainDeps(deps);
+                    cc.loader.release(deps);
+                }
+            } else if (deps && deps instanceof Array) {
+                deps.forEach(v => {
+                    if (this.deps.indexOf(v) === -1) {
+                        this.deps.push(v);
+                        ViewManager.getInstance().retainDeps(v);
+                    }
+                });
+            }
+        };
+
+        ViewManager.getInstance().loadSpriteFrameByName(imgName, node, callBack);
+    }
+
     closeSelf() {
         this.node.parent = null;
         this.node.destroy();
     }
 
     onDestroy() {
+        cc.log("--------------------destory node --------------------" + this.node.name);
         this.removeEventListener();
 
+        ViewManager.getInstance().releaseDeps(this.deps);
+
         if (this.isAutoRelease) {
-            ViewManager.getInstance().releaseDeps(this.deps);
             ViewManager.getInstance().clearUnusedRes();
         }
     }

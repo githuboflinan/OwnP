@@ -1,3 +1,4 @@
+import LogHelper from "../../core/tool/LogHelper";
 import { EventType } from "../../core/constant/EventType";
 import EventManager from "../manager/EventManager";
 import UserComponent from "./UserComponent";
@@ -14,7 +15,7 @@ export default class TopNodeLogic extends UserComponent {
     }
 
     test() {
-        cc.log("this is a test for top node");
+        // LogHelper.log("this is a test for top node");
     }
 }
 

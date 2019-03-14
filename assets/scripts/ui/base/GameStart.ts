@@ -4,30 +4,20 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class GameStart extends cc.Component {
-    @property(cc.Node)
-    nameNode: cc.Node = null;
+    @property([cc.SpriteAtlas])
+    commonAtlas: cc.SpriteAtlas[] = [];
 
     onLoad() {
-        let deps = cc.loader.getDependsRecursively("scene/MainScene");
-        console.log("========mainScene deps: " + JSON.stringify(deps));
+        this.retainCommonDeps();
 
-        if (this.nameNode) {
-            let label = this.nameNode.getComponent(cc.Label);
-            label.string = "";
-        }
+        ViewManager.getInstance().openView("MainView", null, null);
+    }
 
-        if (this.sprNode) {
-            this.sprNode.scale = 1.2;
-            this.sprNode.rotation = 90;
-        }
-
-        cc.log("hello new game");
-
-        let arrNode = this.node.getChildByName("arrow_exp");
-        arrNode.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
-        arrNode.on(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
-
-        // this.testView();
+    retainCommonDeps() {
+        this.commonAtlas.forEach(atlas => {
+            let deps = cc.loader.getDependsRecursively(atlas);
+            ViewManager.getInstance().retainDeps(deps);
+        });
     }
 
     onTouchStart(event: cc.Event.EventTouch) {
@@ -36,21 +26,6 @@ export default class GameStart extends cc.Component {
 
     onTouchEnd(event: cc.Event.EventTouch) {
         ViewManager.getInstance().openView("MainView");
-    }
-
-    testView() {
-        let cb = () => {
-            ViewManager.getInstance().openView("MainView");
-        };
-
-        let cb2 = () => {
-            // ViewManager.getInstance().clearUnusedRes();
-        };
-
-        this.node.runAction(cc.sequence(cc.delayTime(2.0),
-                                        cc.callFunc(cb),
-                                        cc.delayTime(2.0),
-                                        cc.callFunc(cb2)));
     }
 
     initSDK() {

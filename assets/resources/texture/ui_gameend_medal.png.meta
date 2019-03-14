@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "79b40c31-9e87-42e3-9545-c13b24a670b9",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "ui_gameend_medal": {
+      "ver": "1.0.3",
+      "uuid": "e412b12a-993f-45d1-85c5-479580a967f0",
+      "rawTextureUuid": "79b40c31-9e87-42e3-9545-c13b24a670b9",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 178,
+      "height": 194,
+      "rawWidth": 178,
+      "rawHeight": 194,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

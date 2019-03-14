@@ -1,3 +1,4 @@
+import LogHelper from "../../core/tool/LogHelper";
 import { EventType } from "../../core/constant/EventType";
 import EventManager from "../manager/EventManager";
 import ViewManager from "../manager/ViewManager";
@@ -17,7 +18,6 @@ export default class MainViewLogic extends UserComponent {
 
     onEnter() {
         super.onEnter();
-        console.log("onEnter in MainView-=-=-=-=");
 
         this.askNode.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
         this.askNode.on(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
@@ -25,6 +25,10 @@ export default class MainViewLogic extends UserComponent {
         this.eventBack = this.onEventBack.bind(this);
 
         this.addEventListener();
+
+        if (this.topPrefab) {
+            this.openPrefab(this.topPrefab, {}, this.node);
+        }
     }
 
     addEventListener() {
@@ -36,19 +40,17 @@ export default class MainViewLogic extends UserComponent {
     }
 
     onTouchStart(event: cc.Event.EventTouch) {
-        console.log("on askNode touch start");
+        // LogHelper.log("on askNode touch start");
     }
 
     onTouchEnd(event: cc.Event.EventTouch) {
-        console.log("on askNode touch end");
-
-        if (this.topPrefab) {
-            let topNode = this.openPrefab(this.topPrefab, {}, this.node);
-            topNode.logicComponent.test();
-        }
+        LogHelper.log("on askNode touch end");
+        ViewManager.getInstance().openView("StageView", null, null, () => {
+            this.closeSelf();
+        });
     }
 
     onEventBack() {
-        this.closeSelf();
+        // this.closeSelf();
     }
 }

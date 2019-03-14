@@ -1,3 +1,5 @@
+import LogHelper from "../../core/tool/LogHelper";
+import UIResMap from "../../core/constant/UIResMap";
 
 const { ccclass, property } = cc._decorator;
 
@@ -25,6 +27,7 @@ export default class ViewManager {
         this.isShowing = true;
 
         cc.loader.loadRes("prefab/view/" + prefabName, (err, prefab) => {
+            LogHelper.log("open view: " + prefabName);
             if (!err) {
                 let node = cc.instantiate(prefab);
                 if (!parent) {
@@ -43,16 +46,54 @@ export default class ViewManager {
                     node.logicComponent.onEnter();
                 }
 
-                console.log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-                console.log("deps: " + JSON.stringify(deps));
-                console.log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+                if (callBack) {
+                    callBack();
+                }
             } else {
-                console.log("err ------- " + prefabName);
-                console.log(JSON.stringify(err));
+                LogHelper.log(`open view ${prefabName} failed, [ERROR]: ` + JSON.stringify(err));
             }
 
             this.isShowing = false;
         });
+    }
+
+    loadSpriteFrameByName(imgName: string, node: cc.Node, callback: (deps) => void) {
+        if (imgName !== "" && node) {
+            let sprite = node.getComponent(cc.Sprite);
+            if (sprite) {
+                let resInfo = UIResMap[imgName];
+                if (resInfo) {
+                    let resCache = cc.loader.getRes(resInfo.resName, resInfo.resType);
+                    if (resCache) {
+                        if (resInfo.resType.name === "cc_SpriteFrame") {
+                            sprite.spriteFrame = resCache;
+                        } else if (resInfo.resType.name === "cc_SpriteAtlas") {
+                            sprite.spriteFrame = resCache.getSpriteFrame(imgName.split(".")[0]);
+                        }
+
+                        let deps = cc.loader.getDependsRecursively(resCache);
+                        callback(deps)
+                    } else {
+                        cc.loader.loadRes(resInfo.resName, resInfo.resType, (err, res) => {
+                            if (err) {
+                                LogHelper.log(`loadRes ${resInfo.resName} failed!!!!!! \n[ERROR]: ` + JSON.stringify(err));
+                            } else {
+                                if (resInfo.resType.name === "cc_SpriteFrame") {
+                                    sprite.spriteFrame = res;
+                                } else if (resInfo.resType.name === "cc_SpriteAtlas") {
+                                    sprite.spriteFrame = res.getSpriteFrame(imgName.split(".")[0]);
+                                }
+
+                                let deps = cc.loader.getDependsRecursively(res);
+                                callback(deps)
+                            }
+                        });
+                    }
+                } else {
+                    LogHelper.logErr(`img ${imgName} is not exists!!!!!!!!!!!`);
+                }
+            }
+        }
     }
 
     retainDeps(deps) {
@@ -60,47 +101,49 @@ export default class ViewManager {
             let resCache = this.depsCaches[deps] || 0;
             resCache += 1;
             this.depsCaches[deps] = resCache;
-            console.log("depsCaches " + JSON.stringify(this.depsCaches));
-            console.log("deps is string-=-=-=-" + deps);
+            LogHelper.log("retain deps: " + deps);
         } else if (deps && deps instanceof Array) {
             deps.forEach(dep => {
                 this.retainDeps(dep);
             });
-            console.log("deps is array-=-=-=-");
         }
-        console.log("depstype: " + typeof (deps));
-
-        console.log("retain========depsCaches: " + JSON.stringify(this.depsCaches));
     }
 
     releaseDeps(deps) {
         if (deps && typeof deps === "string") {
             if (this.depsCaches[deps] && this.depsCaches[deps] > 0) {
                 this.depsCaches[deps] -= 1;
+
+                LogHelper.log("release========deps: " + deps);
             }
         } else if (deps && deps instanceof Array && deps.length > 0) {
             deps.forEach(dep => {
                 this.releaseDeps(dep);
             });
         }
-
-        console.log("release========depsCaches: " + JSON.stringify(this.depsCaches));
     }
 
     clearUnusedRes() {
         let tempKeyList = [];
-        for (let k in this.depsCaches) {
-            if (this.depsCaches[k] === 0) {
-                tempKeyList.push(k);
+
+        for (let key in this.depsCaches) {
+            if (this.depsCaches.hasOwnProperty(key)) {
+                let count = this.depsCaches[key];
+
+                if (count > 1) {
+                    LogHelper.log("key: " + key + " count: " + count);
+                } else if (count === 0) {
+                    tempKeyList.push(key);
+                }
             }
         }
 
         tempKeyList.forEach(k => {
             cc.loader.release(k);
             delete this.depsCaches[k];
-            console.log("release key: " + k);
+            LogHelper.log("release key: " + k);
         });
 
-        console.log("clearUnusedRes========depsCaches: " + JSON.stringify(this.depsCaches));
+        LogHelper.log("after clearUnusedRes========depsCaches: " + JSON.stringify(this.depsCaches));
     }
 }
